@@ -240,118 +240,120 @@ connection.query(dumpString, (err, res) => {
   //   // });
   // }
   
-  async function initQuiz(msg, channel, playlist) {
-    quizEnded = false;
-    quizQueue = playlist;
-    const connection = await channel.join();
-    const dispatcher = connection.play("countdown.mp3");
-    msg.channel.members.forEach((member) => {
-      if (member.user.bot) return;
-      leaderboard[member] = 0;
-    });
-    console.log("LEADERBOARD: ", leaderboard);
-    setTimeout(
-      () => startQuiz(msg, channel, quizQueue, connection, null),
-      21 * 1000
-    );
-  }
+ 
   
-  async function startQuiz(msg, channel, queue, connection, dispatcher) {
-    console.log(queue);
-    if (quizEnded) return;
-    if (queue.length == 0) {
-      quizEnded = true;
-      msg.channel.send("Gotov kviz :)");
-      dispatcher.destroy();
-      let resultMsg = "";
-      let resultArr = [];
-      Object.keys(leaderboard).forEach((key) => {
-        resultArr.push([key, leaderboard[key]]);
-      });
-      resultArr.sort((a, b) => b[1] - a[1]);
-      resultArr.forEach((member, index) => {
-        let medal;
-        switch (index) {
-          case 0:
-            medal = "🥇";
-            break;
-          case 1:
-            medal = "🥈";
-            break;
-          case 2:
-            medal = "🥉";
-            break;
-          default:
-            medal = `${index + 1}.`;
-        }
-        resultMsg += `${medal} ${member[0]} : ${member[1]} pt \n`;
-      });
-      const endResult = new Discord.MessageEmbed()
-        .setTitle("Quiz results")
-        .setColor(0xff0000)
-        .setDescription(resultMsg);
-      msg.channel.send(endResult);
-      return;
-    }
-    let artistGuessed = false;
-    let songGuessed = false;
-    dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus" });
-    const filter = (m) => true;
-    const collector = msg.channel.createMessageCollector(filter, {
-      time: 60 * 1000,
-    });
-    collector.on("collect", (m) => {
-      const msgContent = m.content.toLowerCase();
-  
-      if (
-        !artistGuessed &&
-        stringSimilarity.compareTwoStrings(msgContent, queue[0].artist) >= 0.5
-      ) {
-        artistGuessed = true;
-        leaderboard[m.author]++;
-        m.react("✅");
-      } else if (
-        !songGuessed &&
-        stringSimilarity.compareTwoStrings(msgContent, queue[0].name) >= 0.5
-      ) {
-        songGuessed = true;
-        m.react("✅");
-        leaderboard[m.author]++;
-      } else {
-        m.react("❌");
-      }
-      if (artistGuessed && songGuessed) {
-        msg.channel.send(`The song was: ${queue[0].artist} - ${queue[0].name}`);
-        queue.shift();
-        startQuiz(msg, channel, queue, connection, dispatcher);
-        collector.stop();
-      }
-    });
-    setTimeout(() => {
-      if (!quizEnded && (!artistGuessed || !songGuessed)) {
-        msg.channel.send(
-          `Nobody got it 😢 \nThe song was: ${queue[0].artist} - ${queue[0].name}`
-        );
-        queue.shift();
-        startQuiz(msg, channel, queue, connection, dispatcher);
-      }
-    }, 60 * 1000);
-  }
-  
-  function getAllSongsInPlaylist(playlistId, fn) {
-    let sql = `SELECT s.id, s.name, s.artist, s.url, sp.timestamp
-    FROM song s, playlist p, song_in_playlist sp
-    WHERE s.id = sp.id_song and p.id = sp.id_playlist and p.id = "${playlistId}"
-    ORDER BY RAND()
-     `;
-    connection.query(sql, (err, res) => {
-      if (!err) {
-        console.log("hiya");
-        fn(res);
-      }
-    });
-  }
   
 })
 
+async function initQuiz(msg, channel, playlist) {
+  quizEnded = false;
+  quizQueue = playlist;
+  const connection = await channel.join();
+  const dispatcher = connection.play("countdown.mp3");
+  msg.channel.members.forEach((member) => {
+    if (member.user.bot) return;
+    leaderboard[member] = 0;
+  });
+  console.log("LEADERBOARD: ", leaderboard);
+  setTimeout(
+    () => startQuiz(msg, channel, quizQueue, connection, null),
+    21 * 1000
+  );
+}
 
+
+async function startQuiz(msg, channel, queue, connection, dispatcher) {
+  console.log(queue);
+  if (quizEnded) return;
+  if (queue.length == 0) {
+    quizEnded = true;
+    msg.channel.send("Gotov kviz :)");
+    dispatcher.destroy();
+    let resultMsg = "";
+    let resultArr = [];
+    Object.keys(leaderboard).forEach((key) => {
+      resultArr.push([key, leaderboard[key]]);
+    });
+    resultArr.sort((a, b) => b[1] - a[1]);
+    resultArr.forEach((member, index) => {
+      let medal;
+      switch (index) {
+        case 0:
+          medal = "🥇";
+          break;
+        case 1:
+          medal = "🥈";
+          break;
+        case 2:
+          medal = "🥉";
+          break;
+        default:
+          medal = `${index + 1}.`;
+      }
+      resultMsg += `${medal} ${member[0]} : ${member[1]} pt \n`;
+    });
+    const endResult = new Discord.MessageEmbed()
+      .setTitle("Quiz results")
+      .setColor(0xff0000)
+      .setDescription(resultMsg);
+    msg.channel.send(endResult);
+    return;
+  }
+  let artistGuessed = false;
+  let songGuessed = false;
+  dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus" });
+  const filter = (m) => true;
+  const collector = msg.channel.createMessageCollector(filter, {
+    time: 60 * 1000,
+  });
+  collector.on("collect", (m) => {
+    const msgContent = m.content.toLowerCase();
+
+    if (
+      !artistGuessed &&
+      stringSimilarity.compareTwoStrings(msgContent, queue[0].artist) >= 0.5
+    ) {
+      artistGuessed = true;
+      leaderboard[m.author]++;
+      m.react("✅");
+    } else if (
+      !songGuessed &&
+      stringSimilarity.compareTwoStrings(msgContent, queue[0].name) >= 0.5
+    ) {
+      songGuessed = true;
+      m.react("✅");
+      leaderboard[m.author]++;
+    } else {
+      m.react("❌");
+    }
+    if (artistGuessed && songGuessed) {
+      msg.channel.send(`The song was: ${queue[0].artist} - ${queue[0].name}`);
+      queue.shift();
+      startQuiz(msg, channel, queue, connection, dispatcher);
+      collector.stop();
+    }
+  });
+  setTimeout(() => {
+    if (!quizEnded && (!artistGuessed || !songGuessed)) {
+      msg.channel.send(
+        `Nobody got it 😢 \nThe song was: ${queue[0].artist} - ${queue[0].name}`
+      );
+      queue.shift();
+      startQuiz(msg, channel, queue, connection, dispatcher);
+    }
+  }, 60 * 1000);
+}
+
+function getAllSongsInPlaylist(playlistId, fn) {
+  let sql = `SELECT s.id, s.name, s.artist, s.url, sp.timestamp
+  FROM song s, playlist p, song_in_playlist sp
+  WHERE s.id = sp.id_song and p.id = sp.id_playlist and p.id = "${playlistId}"
+  ORDER BY RAND()
+   `;
+  connection.query(sql, (err, res) => {
+    if (!err) {
+      console.log("hiya");
+      fn(res);
+    }
+  });
+}
