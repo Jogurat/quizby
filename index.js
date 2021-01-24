@@ -13,7 +13,7 @@ const mysql = require("mysql");
 const ytdl = require("ytdl-core-discord");
 const stringSimilarity = require("string-similarity");
 const connection = mysql.createPool(
-  "mysql://bf70165fe9b8c5:5a80fd7e@eu-cdbr-west-03.cleardb.net/heroku_23885f9db32d52e"
+  process.env.CLEARDB_DATABASE_URL
 );
 
 discordClient.login(process.env.BOT_TOKEN);
@@ -109,11 +109,14 @@ discordClient.on("message", async (msg) => {
           //     emojis.indexOf(reaction.emoji.name) + (page - 1) * itemsPerPage
           //   ].id
           // );
-          getAllSongsInPlaylist(allPlaylists[
-                emojis.indexOf(reaction.emoji.name) + (page - 1) * itemsPerPage
-              ].id, (res) => {
-                initQuiz(msg, voiceChannel, res);
-              })
+          getAllSongsInPlaylist(
+            allPlaylists[
+              emojis.indexOf(reaction.emoji.name) + (page - 1) * itemsPerPage
+            ].id,
+            (res) => {
+              initQuiz(msg, voiceChannel, res);
+            }
+          );
           msg.channel.send(
             `You selected: ${
               allPlaylists[
@@ -177,39 +180,37 @@ discordClient.on("message", async (msg) => {
           console.log(res);
           playlistId = res[0].id;
           let insertIntoSongStmt = `INSERT INTO song (name, artist, url, added_by) VALUES ("${songName}", "${artist}", "${songUrl}", "${msg.member}")`;
-        console.log("SONG ID: ", songId);
-        if (!songId) {
-          connection.query(insertIntoSongStmt, (err, res, fields) => {
-            if (err) console.log(err);
-            else console.log(res.insertId);
-            songId = res.insertId;
-            let insertIntoSongsInPlaylistStmt = `INSERT INTO song_in_playlist (timestamp, id_song, id_playlist) VALUES (${timestamp}, "${songId}", "${playlistId}")`;
-            connection.query(insertIntoSongsInPlaylistStmt, (err, res) => {
-              if (err) {
-                console.log("error in db");
-                console.log(err);
-              } else {
-                console.log("inserted");
-              }
+          console.log("SONG ID: ", songId);
+          if (!songId) {
+            connection.query(insertIntoSongStmt, (err, res, fields) => {
+              if (err) console.log(err);
+              else console.log(res.insertId);
+              songId = res.insertId;
+              let insertIntoSongsInPlaylistStmt = `INSERT INTO song_in_playlist (timestamp, id_song, id_playlist) VALUES (${timestamp}, "${songId}", "${playlistId}")`;
+              connection.query(insertIntoSongsInPlaylistStmt, (err, res) => {
+                if (err) {
+                  console.log("error in db");
+                  console.log(err);
+                } else {
+                  console.log("inserted");
+                }
+              });
             });
-          });
-        }
+          }
         });
-        
       }
     });
   }
-  if(command == "random") {
+  if (command == "random") {
     let randomPlaylistStmt = `SELECT * FROM song ORDER BY RAND() LIMIT 15`;
     connection.query(randomPlaylistStmt, (err, res) => {
       if (err) {
         console.log("ERROR KOD RANDOMA:  ", err);
-        
       } else {
         let voiceChannel = msg.member.voice.channel;
         initQuiz(msg, voiceChannel, res);
       }
-    })
+    });
   }
 });
 
@@ -239,13 +240,16 @@ async function initQuiz(msg, channel, playlist) {
   quizEnded = false;
   quizQueue = playlist;
   const connection = await channel.join();
-    const dispatcher = connection.play("countdown.mp3");
-    msg.channel.members.forEach((member) => {
-      if (member.user.bot) return;
-      leaderboard[member] = 0;
-    });
-    console.log("LEADERBOARD: ", leaderboard);
-    setTimeout(() => startQuiz(msg, channel, quizQueue, connection, null), 21 * 1000);
+  const dispatcher = connection.play("countdown.mp3");
+  msg.channel.members.forEach((member) => {
+    if (member.user.bot) return;
+    leaderboard[member] = 0;
+  });
+  console.log("LEADERBOARD: ", leaderboard);
+  setTimeout(
+    () => startQuiz(msg, channel, quizQueue, connection, null),
+    21 * 1000
+  );
 }
 
 async function startQuiz(msg, channel, queue, connection, dispatcher) {
@@ -263,14 +267,21 @@ async function startQuiz(msg, channel, queue, connection, dispatcher) {
     resultArr.sort((a, b) => b[1] - a[1]);
     resultArr.forEach((member, index) => {
       let medal;
-      switch(index) {
-        case 0: medal = "🥇"; break;
-        case 1: medal = "🥈"; break;
-        case 2: medal = "🥉"; break;
-        default: medal = `${index + 1}.`; 
+      switch (index) {
+        case 0:
+          medal = "🥇";
+          break;
+        case 1:
+          medal = "🥈";
+          break;
+        case 2:
+          medal = "🥉";
+          break;
+        default:
+          medal = `${index + 1}.`;
       }
       resultMsg += `${medal} ${member[0]} : ${member[1]} pt \n`;
-    })
+    });
     const endResult = new Discord.MessageEmbed()
       .setTitle("Quiz results")
       .setColor(0xff0000)
@@ -313,12 +324,13 @@ async function startQuiz(msg, channel, queue, connection, dispatcher) {
     }
   });
   setTimeout(() => {
-  if(!quizEnded && (!artistGuessed || !songGuessed)) {
-    msg.channel.send(`Nobody got it 😢 \nThe song was: ${queue[0].artist} - ${queue[0].name}`);
-    queue.shift();
-    startQuiz(msg, channel, queue, connection, dispatcher);
-  }
-    
+    if (!quizEnded && (!artistGuessed || !songGuessed)) {
+      msg.channel.send(
+        `Nobody got it 😢 \nThe song was: ${queue[0].artist} - ${queue[0].name}`
+      );
+      queue.shift();
+      startQuiz(msg, channel, queue, connection, dispatcher);
+    }
   }, 60 * 1000);
 }
 
