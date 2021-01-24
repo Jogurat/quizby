@@ -17,7 +17,7 @@ const connection = mysql.createPool(
   process.env.CLEARDB_DATABASE_URL
 );
 
-const dumpString = fs.readFileSync("quizby.sql").toString();
+//const dumpString = fs.readFileSync("quizby.sql").toString();
 console.log(dumpString);
 connection.query(dumpString, (err, res) => {
   
