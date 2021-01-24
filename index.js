@@ -1,4 +1,12 @@
 require("dotenv").config();
+const express = require("express");
+const app = express();
+app.get("/", (req, res) => {
+  res.send("i am awake");
+});
+app.listen(process.env.PORT || 3000, () => {
+  console.log("express app is listenting");
+});
 const Discord = require("discord.js");
 const discordClient = new Discord.Client();
 const mysql = require("mysql");
