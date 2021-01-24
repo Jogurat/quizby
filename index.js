@@ -20,7 +20,11 @@ const connection = mysql.createPool(
 const dumpString = fs.readFileSync("quizby.sql").toString();
 console.log(dumpString);
 connection.query(dumpString, (err, res) => {
-  discordClient.login(process.env.BOT_TOKEN);
+  
+  
+})
+
+discordClient.login(process.env.BOT_TOKEN);
   const prefix = process.env.PREFIX || "quizby ";
   
   discordClient.on("message", async (msg) => {
@@ -242,8 +246,6 @@ connection.query(dumpString, (err, res) => {
   
  
   
-  
-})
 
 async function initQuiz(msg, channel, playlist) {
   quizEnded = false;
