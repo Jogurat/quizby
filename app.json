@@ -1,0 +1,12 @@
+{
+    "name": "Quizby - A Discord Bot",
+    "description": "Quick and dirty bot for music quizzes, self hosted",
+    "repository": "https://github.com/Jogurat/quizby",
+    "logo": "https://node-js-sample.herokuapp.com/node.png",
+    "keywords": ["node", "express", "static"],
+    "addons" : [
+        {
+            "plan": "cleardb:ignite"
+        }
+    ]
+  }
