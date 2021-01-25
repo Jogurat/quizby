@@ -210,7 +210,7 @@ connection.query(dumpString, (err, res) => {
       });
     }
     if (command == "random") {
-      let randomPlaylistStmt = `SELECT * FROM song ORDER BY RAND() LIMIT 15`;
+      let randomPlaylistStmt = `SELECT * FROM song s, song_in_playlist sp WHERE s.id = sp.id_song ORDER BY RAND() LIMIT 15`;
       connection.query(randomPlaylistStmt, (err, res) => {
         if (err) {
           console.log("ERROR KOD RANDOMA:  ", err);
