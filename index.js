@@ -346,6 +346,7 @@ connection.query(dumpString, (err, res) => {
           queue.shift();
           startQuiz(msg, channel, queue, connection, dispatcher);
         }
+        return;
       }
       if (m.author.id === discordClient.user.id) return;
       if (
