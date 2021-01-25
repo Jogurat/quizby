@@ -252,9 +252,9 @@ connection.query(dumpString, (err, res) => {
     const dispatcher = connection.play("countdown.mp3");
     songsArr = [];
     currSongIndex = 0;
-    quizQueue.forEach((song) => {
-      songsArr.push(ytdl(song.url, { quality: "lowestaudio" }));
-    });
+    // quizQueue.forEach((song) => {
+    //   songsArr.push(ytdl(song.url, { quality: "lowestaudio" }));
+    // });
     channel.members.forEach((member) => {
       if (member.user.bot) return;
       leaderboard[member] = 0;
@@ -309,10 +309,10 @@ connection.query(dumpString, (err, res) => {
     let songGuessed = false;
     //let readStream = fs.createReadStream(ytdl(queue[0].url));
     // dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
-    //dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
-    dispatcher = connection.play(songsArr.shift(), {
-      seek: queue[0].timestamp,
-    });
+    dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
+    // dispatcher = connection.play(songsArr.shift(), {
+    //   seek: queue[0].timestamp,
+    // });
     //let readStream = fs.createReadStream(await ytdl(queue[0].url));
     //console.log(await ytdl(queue[0].url));
     const filter = (m) => true;
