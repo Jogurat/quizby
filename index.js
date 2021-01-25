@@ -275,12 +275,8 @@ connection.query(dumpString, (err, res) => {
   }
 
   async function startQuiz(msg, channel, queue, connection, dispatcher) {
-    console.log("SONGS ARR: ", songsArr);
-    console.log("ENTERED START QUIZZ TIMES: ", currSongIndex++);
-    console.log("MEM USAGE: ", process.memoryUsage());
     if (quizEnded) return;
     if (queue.length == 0) {
-      skippers.clear();
       quizEnded = true;
       msg.channel.send("Gotov kviz :)");
       dispatcher.destroy();
@@ -316,6 +312,7 @@ connection.query(dumpString, (err, res) => {
     }
     let artistGuessed = false;
     let songGuessed = false;
+    skippers.clear();
     //let readStream = fs.createReadStream(ytdl(queue[0].url));
     dispatcher = connection.play(await ytdl(queue[0].url), {
       type: "opus",
@@ -339,6 +336,8 @@ connection.query(dumpString, (err, res) => {
           `Players needed to skip: **${skippers.size}/${numSkippersNeeded}**`
         );
         if (skippers.size >= numSkippersNeeded) {
+          artistGuessed = true;
+          songGuessed = true;
           collector.stop();
           msg.channel.send(
             `The song was: ${queue[0].artist} - ${queue[0].name}`
