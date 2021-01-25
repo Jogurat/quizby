@@ -257,13 +257,16 @@ connection.query(dumpString, (err, res) => {
     const dispatcher = connection.play("countdown.mp3");
     songsArr = [];
     currSongIndex = 0;
+    let numPlayers = 0;
     // quizQueue.forEach((song) => {
     //   songsArr.push(ytdl(song.url, { quality: "lowestaudio" }));
     // });
     channel.members.forEach((member) => {
       if (member.user.bot) return;
       leaderboard[member] = 0;
+      numPlayers++;
     });
+    numSkippersNeeded = Math.ceil(numPlayers / 2);
     console.log("LEADERBOARD: ", leaderboard);
     setTimeout(
       () => startQuiz(msg, channel, quizQueue, connection, null),
@@ -286,7 +289,6 @@ connection.query(dumpString, (err, res) => {
       Object.keys(leaderboard).forEach((key) => {
         resultArr.push([key, leaderboard[key]]);
       });
-      numSkippersNeeded = Math.ceil(resultArr.length / 2);
       resultArr.sort((a, b) => b[1] - a[1]);
       resultArr.forEach((member, index) => {
         let medal;
