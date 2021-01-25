@@ -8,5 +8,14 @@
         {
             "plan": "cleardb:ignite"
         }
-    ]
+    ],
+    "env": {
+        "BOT_TOKEN": {
+            "description": "The token you get from the Discord Dev dashboard for your bot."
+        },
+        "PREFIX": {
+            "description": "The prefix the bot looks for in messages, defaults to: 'quizby '- (use a word followed by space if you don't want it to be a special character, such as '!'",
+            "value": "quizby "
+        }
+    }
   }
