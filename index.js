@@ -18,6 +18,8 @@ const stringSimilarity = require("string-similarity");
 const connection = mysql.createPool(process.env.CLEARDB_DATABASE_URL);
 
 const dumpString = fs.readFileSync("quizby.sql").toString();
+const SONG_DURATION = process.env.SONG_DURATION || 60;
+const SIMILARITY = process.env.SIMILARITY || 0.5;
 //console.log(dumpString);
 connection.query(dumpString, (err, res) => {
   if (err) {
@@ -326,7 +328,7 @@ connection.query(dumpString, (err, res) => {
     //console.log(await ytdl(queue[0].url));
     const filter = (m) => true;
     const collector = msg.channel.createMessageCollector(filter, {
-      time: 60 * 1000,
+      time: SONG_DURATION * 1000,
     });
     collector.on("collect", (m) => {
       const msgContent = m.content.toLowerCase();
@@ -350,14 +352,14 @@ connection.query(dumpString, (err, res) => {
       if (m.author.id === discordClient.user.id) return;
       if (
         !artistGuessed &&
-        stringSimilarity.compareTwoStrings(msgContent, queue[0].artist) >= 0.5
+        stringSimilarity.compareTwoStrings(msgContent, queue[0].artist) >= SIMILARITY
       ) {
         artistGuessed = true;
         leaderboard[m.author]++;
         m.react("✅");
       } else if (
         !songGuessed &&
-        stringSimilarity.compareTwoStrings(msgContent, queue[0].name) >= 0.5
+        stringSimilarity.compareTwoStrings(msgContent, queue[0].name) >= SIMILARITY
       ) {
         songGuessed = true;
         m.react("✅");
@@ -380,7 +382,7 @@ connection.query(dumpString, (err, res) => {
         queue.shift();
         startQuiz(msg, channel, queue, connection, dispatcher);
       }
-    }, 60 * 1000);
+    }, SONG_DURATION * 1000);
   }
 
   function getAllSongsInPlaylist(playlistId, fn) {
