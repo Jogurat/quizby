@@ -17,14 +17,10 @@ const connection = mysql.createPool(
   process.env.CLEARDB_DATABASE_URL
 );
 
-//const dumpString = fs.readFileSync("quizby.sql").toString();
-// console.log(dumpString);
-// connection.query(dumpString, (err, res) => {
-  
-  
-// })
-
-discordClient.login(process.env.BOT_TOKEN);
+const dumpString = fs.readFileSync("quizby.sql").toString();
+console.log(dumpString);
+connection.query(dumpString, (err, res) => {
+  discordClient.login(process.env.BOT_TOKEN);
   const prefix = process.env.PREFIX || "quizby ";
   
   discordClient.on("message", async (msg) => {
@@ -359,3 +355,6 @@ function getAllSongsInPlaylist(playlistId, fn) {
     }
   });
 }
+  
+})
+
