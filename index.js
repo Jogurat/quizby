@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const fs = require("fs");
+
 app.get("/", (req, res) => {
   res.send("i am awake");
 });
@@ -266,7 +267,9 @@ connection.query(dumpString, (err, res) => {
   }
 
   async function startQuiz(msg, channel, queue, connection, dispatcher) {
-    console.log(queue);
+    console.log("SONGS ARR: ", songsArr);
+    console.log("ENTERED START QUIZZ TIMES: ", currSongIndex++);
+    console.log("MEM USAGE: ", process.memoryUsage());
     if (quizEnded) return;
     if (queue.length == 0) {
       quizEnded = true;
@@ -305,7 +308,7 @@ connection.query(dumpString, (err, res) => {
     let artistGuessed = false;
     let songGuessed = false;
     //let readStream = fs.createReadStream(ytdl(queue[0].url));
-    // dispatcher = connection.play(/*await*/ ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
+    // dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
     //dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
     dispatcher = connection.play(songsArr.shift(), {
       seek: queue[0].timestamp,
