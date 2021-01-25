@@ -11,14 +11,15 @@ app.listen(process.env.PORT || 3000, () => {
 const Discord = require("discord.js");
 const discordClient = new Discord.Client();
 const mysql = require("mysql");
-const ytdl = require("ytdl-core-discord");
+//const ytdl = require("ytdl-core-discord");
+const ytdl = require("ytdl-core");
 const stringSimilarity = require("string-similarity");
 const connection = mysql.createPool(
   process.env.CLEARDB_DATABASE_URL
 );
 
 const dumpString = fs.readFileSync("quizby.sql").toString();
-console.log(dumpString);
+//console.log(dumpString);
 connection.query(dumpString, (err, res) => {
   if (err) {
     console.log("DUMP ERROR", err);
@@ -145,7 +146,7 @@ connection.query(dumpString, (err, res) => {
       let playlistToAdd = args[0];
       let songUrl = args[1];
       let timestamp = parseInt(args[2]);
-      const basicDetails = await ytdl.getBasicInfo(songUrl);
+      const basicDetails =  await  ytdl.getBasicInfo(songUrl);
       const title = basicDetails.videoDetails.title;
       let [artist, songName] = title.split(" - ");
       artist = artist.toLowerCase();
@@ -251,7 +252,7 @@ async function initQuiz(msg, channel, playlist) {
   quizQueue = playlist;
   const connection = await channel.join();
   const dispatcher = connection.play("countdown.mp3");
-  msg.channel.members.forEach((member) => {
+  channel.members.forEach((member) => {
     if (member.user.bot) return;
     leaderboard[member] = 0;
   });
@@ -302,14 +303,18 @@ async function startQuiz(msg, channel, queue, connection, dispatcher) {
   }
   let artistGuessed = false;
   let songGuessed = false;
-  dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus" });
+  //let readStream = fs.createReadStream(ytdl(queue[0].url));
+  // dispatcher = connection.play(/*await*/ ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
+  dispatcher = connection.play(ytdl(queue[0].url), { seek: queue[0].timestamp });
+  //let readStream = fs.createReadStream(await ytdl(queue[0].url));
+  //console.log(await ytdl(queue[0].url));
   const filter = (m) => true;
   const collector = msg.channel.createMessageCollector(filter, {
     time: 60 * 1000,
   });
   collector.on("collect", (m) => {
     const msgContent = m.content.toLowerCase();
-
+    if (m.author.id === discordClient.user.id) return;
     if (
       !artistGuessed &&
       stringSimilarity.compareTwoStrings(msgContent, queue[0].artist) >= 0.5
@@ -328,10 +333,10 @@ async function startQuiz(msg, channel, queue, connection, dispatcher) {
       m.react("❌");
     }
     if (artistGuessed && songGuessed) {
+      collector.stop();
       msg.channel.send(`The song was: ${queue[0].artist} - ${queue[0].name}`);
       queue.shift();
       startQuiz(msg, channel, queue, connection, dispatcher);
-      collector.stop();
     }
   });
   setTimeout(() => {
