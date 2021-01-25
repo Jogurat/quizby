@@ -19,7 +19,7 @@
 -- Table structure for table `playlist`
 --
 
---DROP TABLE IF EXISTS `playlist`;
+-- DROP TABLE IF EXISTS `playlist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `playlist` (
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `playlist` (
 -- Table structure for table `song`
 --
 
---DROP TABLE IF EXISTS `song`;
+-- DROP TABLE IF EXISTS `song`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `song` (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `song` (
 -- Table structure for table `song_in_playlist`
 --
 
---DROP TABLE IF EXISTS `song_in_playlist`;
+-- DROP TABLE IF EXISTS `song_in_playlist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `song_in_playlist` (
