@@ -12,8 +12,8 @@ app.listen(process.env.PORT || 3000, () => {
 const Discord = require("discord.js");
 const discordClient = new Discord.Client();
 const mysql = require("mysql");
-//const ytdl = require("ytdl-core-discord");
-const ytdl = require("ytdl-core");
+const ytdl = require("ytdl-core-discord");
+//const ytdl = require("ytdl-core");
 const stringSimilarity = require("string-similarity");
 const connection = mysql.createPool(process.env.CLEARDB_DATABASE_URL);
 
@@ -308,8 +308,8 @@ connection.query(dumpString, (err, res) => {
     let artistGuessed = false;
     let songGuessed = false;
     //let readStream = fs.createReadStream(ytdl(queue[0].url));
-    // dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
-    dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
+    dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
+    //dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
     // dispatcher = connection.play(songsArr.shift(), {
     //   seek: queue[0].timestamp,
     // });
