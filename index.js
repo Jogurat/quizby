@@ -230,6 +230,8 @@ connection.query(dumpString, (err, res) => {
   let quizEnded = false;
   let songsArr = [];
   let currSongIndex = 0;
+  const skippers = new Set();
+  let numSkippersNeeded;
   // async function initQuiz(msg, channel, playlist) {
   //   quizEnded = false;
   //   getAllSongsInPlaylist(playlist, async (res) => {
@@ -275,6 +277,7 @@ connection.query(dumpString, (err, res) => {
     console.log("MEM USAGE: ", process.memoryUsage());
     if (quizEnded) return;
     if (queue.length == 0) {
+      skippers.clear();
       quizEnded = true;
       msg.channel.send("Gotov kviz :)");
       dispatcher.destroy();
@@ -283,6 +286,7 @@ connection.query(dumpString, (err, res) => {
       Object.keys(leaderboard).forEach((key) => {
         resultArr.push([key, leaderboard[key]]);
       });
+      numSkippersNeeded = Math.ceil(resultArr.length / 2);
       resultArr.sort((a, b) => b[1] - a[1]);
       resultArr.forEach((member, index) => {
         let medal;
@@ -311,7 +315,10 @@ connection.query(dumpString, (err, res) => {
     let artistGuessed = false;
     let songGuessed = false;
     //let readStream = fs.createReadStream(ytdl(queue[0].url));
-    dispatcher = connection.play(await ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
+    dispatcher = connection.play(await ytdl(queue[0].url), {
+      type: "opus",
+      seek: queue[0].timestamp,
+    });
     //dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
     // dispatcher = connection.play(songsArr.shift(), {
     //   seek: queue[0].timestamp,
@@ -324,6 +331,20 @@ connection.query(dumpString, (err, res) => {
     });
     collector.on("collect", (m) => {
       const msgContent = m.content.toLowerCase();
+      if (msgContent == "skiperino" || msgContent == "!pass") {
+        skippers.add(m.author.id);
+        msg.channel.send(
+          `Players needed to skip: **${skippers.size}/${numSkippersNeeded}**`
+        );
+        if (skippers.size >= numSkippersNeeded) {
+          collector.stop();
+          msg.channel.send(
+            `The song was: ${queue[0].artist} - ${queue[0].name}`
+          );
+          queue.shift();
+          startQuiz(msg, channel, queue, connection, dispatcher);
+        }
+      }
       if (m.author.id === discordClient.user.id) return;
       if (
         !artistGuessed &&
