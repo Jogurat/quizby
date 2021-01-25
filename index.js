@@ -312,7 +312,7 @@ async function startQuiz(msg, channel, queue, connection, dispatcher) {
   //let readStream = fs.createReadStream(ytdl(queue[0].url));
   // dispatcher = connection.play(/*await*/ ytdl(queue[0].url), { type: "opus", seek: queue[0].timestamp });
   //dispatcher = connection.play(ytdl(queue[0].url, {quality: "lowestaudio"}), { seek: queue[0].timestamp });
-  dispatcher = connection.play(songsArr[currSongIndex++]), { seek: queue[0].timestamp });
+  dispatcher = connection.play(songsArr[currSongIndex++], { seek: queue[0].timestamp });
   //let readStream = fs.createReadStream(await ytdl(queue[0].url));
   //console.log(await ytdl(queue[0].url));
   const filter = (m) => true;
