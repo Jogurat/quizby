@@ -20,6 +20,9 @@ const connection = mysql.createPool(
 const dumpString = fs.readFileSync("quizby.sql").toString();
 console.log(dumpString);
 connection.query(dumpString, (err, res) => {
+  if (err) {
+    console.log("DUMP ERROR", err);
+  }
   discordClient.login(process.env.BOT_TOKEN);
   const prefix = process.env.PREFIX || "quizby ";
   
